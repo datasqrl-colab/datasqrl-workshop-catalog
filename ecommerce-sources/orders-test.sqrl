@@ -1,7 +1,7 @@
 -- Order Data Tables for Test Environment
 --
 -- Uses filesystem connector with file monitoring for streaming test data.
--- Requires configuring `ecommerce-test-data` config variable to either `test` or `qa`.
+-- Requires configuring `script.config.ecommerce-test-data` config variable to either `dev` (for local testing) or `qa` in package.json.
 
 /** Stream of customer orders with nested line items referencing products and sellers */
 /*+no_query */

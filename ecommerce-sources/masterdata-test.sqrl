@@ -2,7 +2,7 @@
 -- the operational databases containing the master data.
 --
 -- Uses filesystem connector with file monitoring for streaming test data.
--- Requires configuring `ecommerce-test-data` config variable to either `test` or `qa`.
+-- Requires configuring `script.config.ecommerce-test-data` config variable to either `dev` (for local testing) or `qa` in package.json.
 
 /** Stream of customer updates from operational customer database */
 CREATE TABLE Customers_Cdcstream (
