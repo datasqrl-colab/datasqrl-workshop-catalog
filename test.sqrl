@@ -1,0 +1,36 @@
+IMPORT ecommerce-sources.orders-{{environment}}.*;
+IMPORT ecommerce-sources.masterdata-{{environment}} AS masterdata;
+
+-- Order tables
+Orders := SELECT * FROM OrderEvents;
+Payments := SELECT * FROM PaymentEvents;
+OrderFulfillment := SELECT * FROM OrderFulfillmentEvents;
+Reviews := SELECT * FROM ReviewEvents;
+
+-- Master data tables
+Customers := SELECT * FROM masterdata.Customers;
+Sellers := SELECT * FROM masterdata.Sellers;
+Products := SELECT * FROM masterdata.Products;
+Geolocation := SELECT * FROM masterdata.Geolocation;
+
+-- TESTS --
+
+-- Order tables
+/*+test */
+OrdersTest := SELECT * FROM Orders ORDER BY order_purchase_timestamp DESC LIMIT 10;
+/*+test */
+PaymentsTest := SELECT * FROM Payments ORDER BY transaction_approved_at DESC LIMIT 10;
+/*+test */
+OrderFulfillmentTest := SELECT * FROM OrderFulfillment ORDER BY `timestamp` DESC LIMIT 10;
+/*+test */
+ReviewsTest := SELECT * FROM Reviews ORDER BY review_answer_timestamp DESC LIMIT 10;
+
+-- Master data tables
+/*+test */
+CustomersTest := SELECT * FROM Customers ORDER BY customer_id LIMIT 10;
+/*+test */
+SellersTest := SELECT * FROM Sellers ORDER BY seller_id LIMIT 10;
+/*+test */
+ProductsTest := SELECT * FROM Products ORDER BY product_id LIMIT 10;
+/*+test */
+GeolocationTest := SELECT * FROM Geolocation ORDER BY geolocation_zip_code_prefix LIMIT 10;

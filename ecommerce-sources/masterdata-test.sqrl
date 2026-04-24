@@ -1,0 +1,92 @@
+-- Master Data Tables for Test Environment which simulate the real world CDC streams from
+-- the operational databases containing the master data.
+--
+-- Uses filesystem connector with file monitoring for streaming test data.
+-- Requires configuring `ecommerce-test-data` config variable to either `test` or `qa`.
+
+/** Stream of customer updates from operational customer database */
+CREATE TABLE Customers_Cdcstream (
+    customer_id STRING NOT NULL,
+    customer_unique_id STRING NOT NULL,
+    customer_zip_code_prefix STRING,
+    customer_city STRING,
+    customer_state STRING,
+    updateTime TIMESTAMP(3) NOT NULL,
+    WATERMARK FOR updateTime AS updateTime - INTERVAL '0.001' SECOND
+) WITH (
+    'connector' = 'filesystem',
+    'path' = '${DATA_PATH}/ecommerce-customers-{{ecommerce-test-data}}.csv',
+    'format' = 'csv',
+    'csv.ignore-parse-errors' = 'true',
+    'csv.allow-comments' = 'true',
+    'source.monitor-interval' = '10 min'
+);
+
+/** Most recent customer records with version history */
+Customers := DISTINCT Customers_Cdcstream ON customer_id ORDER BY updateTime DESC;
+
+/** Stream of seller data from operational seller database */
+CREATE TABLE Sellers_Cdcstream (
+    seller_id STRING NOT NULL,
+    seller_zip_code_prefix STRING,
+    seller_city STRING,
+    seller_state STRING,
+    updateTime TIMESTAMP(3) NOT NULL,
+    WATERMARK FOR updateTime AS updateTime - INTERVAL '0.001' SECOND
+) WITH (
+    'connector' = 'filesystem',
+    'path' = '${DATA_PATH}/ecommerce-sellers-{{ecommerce-test-data}}.csv',
+    'format' = 'csv',
+    'csv.ignore-parse-errors' = 'true',
+    'csv.allow-comments' = 'true',
+    'source.monitor-interval' = '10 min'
+);
+
+/** Most recent seller records with version history */
+Sellers := DISTINCT Sellers_Cdcstream ON seller_id ORDER BY updateTime DESC;
+
+/** Stream of product data from operational product database */
+CREATE TABLE Products_Cdcstream (
+    product_id STRING NOT NULL,
+    product_category_name STRING,
+    product_name_length INT,
+    product_description_length INT,
+    product_photos_qty INT,
+    product_weight_g INT,
+    product_length_cm INT,
+    product_height_cm INT,
+    product_width_cm INT,
+    updateTime TIMESTAMP(3) NOT NULL,
+    WATERMARK FOR updateTime AS updateTime - INTERVAL '0.001' SECOND
+) WITH (
+    'connector' = 'filesystem',
+    'path' = '${DATA_PATH}/ecommerce-products-{{ecommerce-test-data}}.csv',
+    'format' = 'csv',
+    'csv.ignore-parse-errors' = 'true',
+    'csv.allow-comments' = 'true',
+    'source.monitor-interval' = '10 min'
+);
+
+/** Most recent product records with version history */
+Products := DISTINCT Products_Cdcstream ON product_id ORDER BY updateTime DESC;
+
+/** Static geolocation reference data mapping zip codes to geo-coordinates */
+CREATE TABLE Geolocation_Cdcstream (
+    geolocation_zip_code_prefix STRING NOT NULL,
+    geolocation_lat DOUBLE,
+    geolocation_lng DOUBLE,
+    geolocation_city STRING,
+    geolocation_state STRING,
+    lastUpdatedTime TIMESTAMP(3) NOT NULL,
+    WATERMARK FOR lastUpdatedTime AS lastUpdatedTime - INTERVAL '0.001' SECOND
+) WITH (
+    'connector' = 'filesystem',
+    'path' = '${DATA_PATH}/ecommerce-geolocation-{{ecommerce-test-data}}.csv',
+    'format' = 'csv',
+    'csv.ignore-parse-errors' = 'true',
+    'csv.allow-comments' = 'true',
+    'source.monitor-interval' = '10 min'
+);
+
+/** Most geolocation records with version history */
+Geolocation := DISTINCT Geolocation_Cdcstream ON geolocation_zip_code_prefix ORDER BY lastUpdatedTime DESC;

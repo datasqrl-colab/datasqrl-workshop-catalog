@@ -1,0 +1,6 @@
+--
+-- For this workshop, we use the same test data for prod.
+-- In real-life these would be Kafka CDC topics or CDC streams directly from the database with debezium.
+--
+
+IMPORT masterdata-test.*;

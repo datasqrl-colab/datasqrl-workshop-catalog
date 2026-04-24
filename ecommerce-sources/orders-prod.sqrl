@@ -1,0 +1,53 @@
+-- Order Data Tables for Production Environment
+--
+-- Uses DataSQRL-managed Kafka connector for event-sources through API
+
+/** Stream of customer orders with nested line items referencing products and sellers */
+/*+no_query, engine(kafka) */
+CREATE TABLE OrderEvents (
+    order_id STRING NOT NULL METADATA FROM 'uuid',
+    customer_id STRING NOT NULL,
+    order_purchase_timestamp TIMESTAMP(3) NOT NULL METADATA FROM 'timestamp',
+    order_estimated_delivery_date TIMESTAMP(3),
+    items ARRAY<ROW<
+        order_item_id INT,
+        product_id STRING,
+        seller_id STRING,
+        shipping_limit_date TIMESTAMP(3),
+        price DOUBLE,
+        freight_value DOUBLE
+    >> NOT NULL
+);
+
+/** Stream of payment transactions */
+/*+no_query, engine(kafka) */
+CREATE TABLE PaymentEvents (
+    payment_id STRING NOT NULL METADATA FROM 'uuid',
+    order_id STRING NOT NULL,
+    payment_sequential INT NOT NULL, -- when the payment is split this captures the sequence number
+    payment_type STRING, -- credit_card, boleto, voucher, etc
+    payment_installments INT, -- >1 if payment is made in multiple installments
+    payment_value DOUBLE,
+    transaction_approved_at TIMESTAMP(3) NOT NULL METADATA FROM 'timestamp'
+);
+
+/** Stream of order fulfillment events (shipped, delivered) */
+/*+no_query, engine(kafka) */
+CREATE TABLE OrderFulfillmentEvents (
+    event_id STRING NOT NULL METADATA FROM 'uuid',
+    order_id STRING NOT NULL,
+    event_type STRING NOT NULL, -- one of: shipped, delivered
+    `timestamp` TIMESTAMP(3) NOT NULL METADATA FROM 'timestamp'
+);
+
+/** Stream of customer reviews for their orders */
+/*+no_query, engine(kafka) */
+CREATE TABLE ReviewEvents (
+    review_id STRING NOT NULL METADATA FROM 'uuid',
+    order_id STRING NOT NULL,
+    review_score INT,
+    review_comment_title STRING,
+    review_comment_message STRING,
+    review_creation_date TIMESTAMP(3), -- when the feedback survey was sent out
+    review_answer_timestamp TIMESTAMP(3) NOT NULL METADATA FROM 'timestamp'
+);

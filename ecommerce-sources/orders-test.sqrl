@@ -1,0 +1,81 @@
+-- Order Data Tables for Test Environment
+--
+-- Uses filesystem connector with file monitoring for streaming test data.
+-- Requires configuring `ecommerce-test-data` config variable to either `test` or `qa`.
+
+/** Stream of customer orders with nested line items referencing products and sellers */
+/*+no_query */
+CREATE TABLE OrderEvents (
+    order_id STRING NOT NULL,
+    customer_id STRING NOT NULL,
+    order_purchase_timestamp TIMESTAMP(3) NOT NULL,
+    order_estimated_delivery_date TIMESTAMP(3),
+    items ARRAY<ROW<
+        order_item_id INT,
+        product_id STRING,
+        seller_id STRING,
+        shipping_limit_date TIMESTAMP(3),
+        price DOUBLE,
+        freight_value DOUBLE
+    >> NOT NULL,
+    WATERMARK FOR order_purchase_timestamp AS order_purchase_timestamp - INTERVAL '0.001' SECOND
+) WITH (
+    'connector' = 'filesystem',
+    'path' = '${DATA_PATH}/ecommerce-orders-{{ecommerce-test-data}}.jsonl',
+    'format' = 'json',
+    'json.timestamp-format.standard' = 'SQL',
+    'source.monitor-interval' = '10 min'
+);
+
+/** Stream of payment transactions */
+/*+no_query */
+CREATE TABLE PaymentEvents (
+    order_id STRING NOT NULL,
+    payment_sequential INT NOT NULL, -- when the payment is split this captures the sequence number
+    payment_type STRING, -- credit_card, boleto, voucher, etc
+    payment_installments INT, -- >1 if payment is made in multiple installments
+    payment_value DOUBLE,
+    transaction_approved_at TIMESTAMP(3) NOT NULL,
+    WATERMARK FOR transaction_approved_at AS transaction_approved_at - INTERVAL '0.001' SECOND
+) WITH (
+    'connector' = 'filesystem',
+    'path' = '${DATA_PATH}/ecommerce-payments-{{ecommerce-test-data}}.jsonl',
+    'format' = 'json',
+    'json.timestamp-format.standard' = 'SQL',
+    'source.monitor-interval' = '10 min'
+);
+
+/** Stream of order fulfillment events (shipped, delivered) */
+/*+no_query */
+CREATE TABLE OrderFulfillmentEvents (
+    order_id STRING NOT NULL,
+    event_type STRING NOT NULL, -- one of: shipped, delivered
+    `timestamp` TIMESTAMP(3) NOT NULL,
+    WATERMARK FOR `timestamp` AS `timestamp` - INTERVAL '0.001' SECOND
+) WITH (
+    'connector' = 'filesystem',
+    'path' = '${DATA_PATH}/ecommerce-orderfulfillment-{{ecommerce-test-data}}.jsonl',
+    'format' = 'json',
+    'json.timestamp-format.standard' = 'SQL',
+    'source.monitor-interval' = '10 min'
+);
+
+/** Stream of customer reviews for their orders */
+/*+no_query */
+CREATE TABLE ReviewEvents (
+    review_id STRING NOT NULL,
+    order_id STRING NOT NULL,
+    review_score INT,
+    review_comment_title STRING,
+    review_comment_message STRING,
+    review_creation_date TIMESTAMP(3), -- when the feedback survey was sent out
+    review_answer_timestamp TIMESTAMP(3) NOT NULL,
+    WATERMARK FOR review_answer_timestamp AS review_answer_timestamp - INTERVAL '0.001' SECOND
+) WITH (
+    'connector' = 'filesystem',
+    'path' = '${DATA_PATH}/ecommerce-reviews-{{ecommerce-test-data}}.csv',
+    'format' = 'csv',
+    'csv.ignore-parse-errors' = 'true',
+    'csv.allow-comments' = 'true',
+    'source.monitor-interval' = '10 min'
+);
