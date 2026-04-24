@@ -2,24 +2,26 @@
 --
 -- Uses DataSQRL-managed Kafka connector for event-sources through API
 
-/** Stream of customer orders with nested line items referencing products and sellers */
+/** Stream of customer orders with nested line items referencing products and sellers.
+  Order events are produced by the online ordering system. */
 /*+no_query, engine(kafka) */
 CREATE TABLE OrderEvents (
     order_id STRING NOT NULL METADATA FROM 'uuid',
-    customer_id STRING NOT NULL,
+    customer_id STRING NOT NULL, -- FK to masterdata Customers
     order_purchase_timestamp TIMESTAMP(3) NOT NULL METADATA FROM 'timestamp',
     order_estimated_delivery_date TIMESTAMP(3),
     items ARRAY<ROW<
         order_item_id INT,
         product_id STRING,
-        seller_id STRING,
-        shipping_limit_date TIMESTAMP(3),
+        seller_id STRING, -- FK to masterdata Products
+        shipping_limit_date TIMESTAMP(3), -- time by which seller must ship order
         price DOUBLE,
         freight_value DOUBLE
     >> NOT NULL
 );
 
-/** Stream of payment transactions */
+/** Stream of payment transactions.
+    Payment transactions happen within 30 days of an order (i.e. transaction_approved_at < order_purchase_timestamp + INTERVAL 30 DAYS) since orders are closed for non-payment within that interval. */
 /*+no_query, engine(kafka) */
 CREATE TABLE PaymentEvents (
     payment_id STRING NOT NULL METADATA FROM 'uuid',
@@ -31,7 +33,8 @@ CREATE TABLE PaymentEvents (
     transaction_approved_at TIMESTAMP(3) NOT NULL METADATA FROM 'timestamp'
 );
 
-/** Stream of order fulfillment events (shipped, delivered) */
+/** Stream of order fulfillment events (shipped, delivered).
+  Fulfillment events happen within 60 days of the order being placed (i.e. timestamp < order_purchase_timestamp + INTERVAL 60 DAYS) since orders are closed or considered lost after that time. */
 /*+no_query, engine(kafka) */
 CREATE TABLE OrderFulfillmentEvents (
     event_id STRING NOT NULL METADATA FROM 'uuid',
@@ -40,7 +43,8 @@ CREATE TABLE OrderFulfillmentEvents (
     `timestamp` TIMESTAMP(3) NOT NULL METADATA FROM 'timestamp'
 );
 
-/** Stream of customer reviews for their orders */
+/** Stream of customer reviews for their orders.
+  Review events happen within 90 days of order placement (i.e. review_answer_timestamp < order_purchase_timestamp + INTERVAL 90 DAYS) since feedback surveys are only accessible within that interval. */
 /*+no_query, engine(kafka) */
 CREATE TABLE ReviewEvents (
     review_id STRING NOT NULL METADATA FROM 'uuid',

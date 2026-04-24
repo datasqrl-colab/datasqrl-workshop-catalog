@@ -3,18 +3,19 @@
 -- Uses filesystem connector with file monitoring for streaming test data.
 -- Requires configuring `script.config.ecommerce-test-data` config variable to either `dev` (for local testing) or `qa` in package.json.
 
-/** Stream of customer orders with nested line items referencing products and sellers */
+/** Stream of customer orders with nested line items referencing products and sellers.
+  Order events are produced by the online ordering system. */
 /*+no_query */
 CREATE TABLE OrderEvents (
     order_id STRING NOT NULL,
-    customer_id STRING NOT NULL,
+    customer_id STRING NOT NULL, -- FK to masterdata Customers
     order_purchase_timestamp TIMESTAMP(3) NOT NULL,
     order_estimated_delivery_date TIMESTAMP(3),
     items ARRAY<ROW<
         order_item_id INT,
         product_id STRING,
-        seller_id STRING,
-        shipping_limit_date TIMESTAMP(3),
+        seller_id STRING, -- FK to masterdata Products
+        shipping_limit_date TIMESTAMP(3), -- time by which seller must ship order
         price DOUBLE,
         freight_value DOUBLE
     >> NOT NULL,
@@ -27,7 +28,8 @@ CREATE TABLE OrderEvents (
     'source.monitor-interval' = '10 min'
 );
 
-/** Stream of payment transactions */
+/** Stream of payment transactions.
+    Payment transactions happen within 30 days of an order (i.e. transaction_approved_at < order_purchase_timestamp + INTERVAL 30 DAYS) since orders are closed for non-payment within that interval. */
 /*+no_query */
 CREATE TABLE PaymentEvents (
     order_id STRING NOT NULL,
@@ -45,7 +47,8 @@ CREATE TABLE PaymentEvents (
     'source.monitor-interval' = '10 min'
 );
 
-/** Stream of order fulfillment events (shipped, delivered) */
+/** Stream of order fulfillment events (shipped, delivered).
+  Fulfillment events happen within 60 days of the order being placed (i.e. timestamp < order_purchase_timestamp + INTERVAL 60 DAYS) since orders are closed or considered lost after that time. */
 /*+no_query */
 CREATE TABLE OrderFulfillmentEvents (
     order_id STRING NOT NULL,
@@ -60,7 +63,8 @@ CREATE TABLE OrderFulfillmentEvents (
     'source.monitor-interval' = '10 min'
 );
 
-/** Stream of customer reviews for their orders */
+/** Stream of customer reviews for their orders.
+  Review events happen within 90 days of order placement (i.e. review_answer_timestamp < order_purchase_timestamp + INTERVAL 90 DAYS) since feedback surveys are only accessible within that interval. */
 /*+no_query */
 CREATE TABLE ReviewEvents (
     review_id STRING NOT NULL,
