@@ -187,14 +187,14 @@ COPY (
     SELECT customer_id, customer_unique_id, customer_zip_code_prefix, customer_city, customer_state, updateTime
     FROM selected_customers
     ORDER BY updateTime
-) TO '$TARGET_DIR/ecommerce-customers-test.csv' (HEADER, DELIMITER ',');
+) TO '$TARGET_DIR/ecommerce-customers-dev.csv' (HEADER, DELIMITER ',');
 
 -- Sellers (CSV, ordered by updateTime)
 COPY (
     SELECT seller_id, seller_zip_code_prefix, seller_city, seller_state, updateTime
     FROM selected_sellers
     ORDER BY updateTime
-) TO '$TARGET_DIR/ecommerce-sellers-test.csv' (HEADER, DELIMITER ',');
+) TO '$TARGET_DIR/ecommerce-sellers-dev.csv' (HEADER, DELIMITER ',');
 
 -- Products (CSV, ordered by updateTime)
 COPY (
@@ -202,42 +202,42 @@ COPY (
            product_photos_qty, product_weight_g, product_length_cm, product_height_cm, product_width_cm, updateTime
     FROM selected_products
     ORDER BY updateTime
-) TO '$TARGET_DIR/ecommerce-products-test.csv' (HEADER, DELIMITER ',');
+) TO '$TARGET_DIR/ecommerce-products-dev.csv' (HEADER, DELIMITER ',');
 
 -- Geolocation (CSV, ordered by lastUpdatedTime)
 COPY (
     SELECT geolocation_zip_code_prefix, geolocation_lat, geolocation_lng, geolocation_city, geolocation_state, lastUpdatedTime
     FROM selected_geolocation
     ORDER BY lastUpdatedTime
-) TO '$TARGET_DIR/ecommerce-geolocation-test.csv' (HEADER, DELIMITER ',');
+) TO '$TARGET_DIR/ecommerce-geolocation-dev.csv' (HEADER, DELIMITER ',');
 
 -- Reviews (CSV, ordered by review_answer_timestamp)
 COPY (
     SELECT review_id, order_id, review_score, review_comment_title, review_comment_message, review_creation_date, review_answer_timestamp
     FROM selected_reviews
     ORDER BY review_answer_timestamp
-) TO '$TARGET_DIR/ecommerce-reviews-test.csv' (HEADER, DELIMITER ',');
+) TO '$TARGET_DIR/ecommerce-reviews-dev.csv' (HEADER, DELIMITER ',');
 
 -- Orders (JSONL, ordered by order_purchase_timestamp)
 COPY (
     SELECT order_id, customer_id, order_purchase_timestamp, order_estimated_delivery_date, items
     FROM selected_orders
     ORDER BY order_purchase_timestamp
-) TO '$TARGET_DIR/ecommerce-orders-test.jsonl' (FORMAT JSON);
+) TO '$TARGET_DIR/ecommerce-orders-dev.jsonl' (FORMAT JSON);
 
 -- Payments (JSONL, ordered by transaction_approved_at)
 COPY (
     SELECT order_id, payment_sequential, payment_type, payment_installments, payment_value, transaction_approved_at
     FROM selected_payments
     ORDER BY transaction_approved_at
-) TO '$TARGET_DIR/ecommerce-payments-test.jsonl' (FORMAT JSON);
+) TO '$TARGET_DIR/ecommerce-payments-dev.jsonl' (FORMAT JSON);
 
 -- Fulfillment events (JSONL, ordered by timestamp)
 COPY (
     SELECT order_id, event_type, timestamp
     FROM selected_fulfillment
     ORDER BY timestamp
-) TO '$TARGET_DIR/ecommerce-orderfulfillment-test.jsonl' (FORMAT JSON);
+) TO '$TARGET_DIR/ecommerce-orderfulfillment-dev.jsonl' (FORMAT JSON);
 "
 
 echo ""
@@ -247,11 +247,11 @@ ls -la "$TARGET_DIR"
 
 echo ""
 echo "Record counts:"
-echo "  Sellers: $(tail -n +2 "$TARGET_DIR/ecommerce-sellers-test.csv" | wc -l | tr -d ' ')"
-echo "  Customers: $(tail -n +2 "$TARGET_DIR/ecommerce-customers-test.csv" | wc -l | tr -d ' ')"
-echo "  Products: $(tail -n +2 "$TARGET_DIR/ecommerce-products-test.csv" | wc -l | tr -d ' ')"
-echo "  Geolocation: $(tail -n +2 "$TARGET_DIR/ecommerce-geolocation-test.csv" | wc -l | tr -d ' ')"
-echo "  Reviews: $(tail -n +2 "$TARGET_DIR/ecommerce-reviews-test.csv" | wc -l | tr -d ' ')"
-echo "  Orders: $(wc -l < "$TARGET_DIR/ecommerce-orders-test.jsonl" | tr -d ' ')"
-echo "  Payments: $(wc -l < "$TARGET_DIR/ecommerce-payments-test.jsonl" | tr -d ' ')"
-echo "  Fulfillment events: $(wc -l < "$TARGET_DIR/ecommerce-orderfulfillment-test.jsonl" | tr -d ' ')"
+echo "  Sellers: $(tail -n +2 "$TARGET_DIR/ecommerce-sellers-dev.csv" | wc -l | tr -d ' ')"
+echo "  Customers: $(tail -n +2 "$TARGET_DIR/ecommerce-customers-dev.csv" | wc -l | tr -d ' ')"
+echo "  Products: $(tail -n +2 "$TARGET_DIR/ecommerce-products-dev.csv" | wc -l | tr -d ' ')"
+echo "  Geolocation: $(tail -n +2 "$TARGET_DIR/ecommerce-geolocation-dev.csv" | wc -l | tr -d ' ')"
+echo "  Reviews: $(tail -n +2 "$TARGET_DIR/ecommerce-reviews-dev.csv" | wc -l | tr -d ' ')"
+echo "  Orders: $(wc -l < "$TARGET_DIR/ecommerce-orders-dev.jsonl" | tr -d ' ')"
+echo "  Payments: $(wc -l < "$TARGET_DIR/ecommerce-payments-dev.jsonl" | tr -d ' ')"
+echo "  Fulfillment events: $(wc -l < "$TARGET_DIR/ecommerce-orderfulfillment-dev.jsonl" | tr -d ' ')"
