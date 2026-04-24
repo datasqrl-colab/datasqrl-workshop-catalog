@@ -3,7 +3,7 @@
 --
 -- Uses filesystem connector with file monitoring for streaming test data.
 -- Requires configuring `script.config.ecommerce-test-data` config variable to either `dev` (for local testing) or `qa` in package.json.
--- The env var ${DATA_PATH} is automatically resolved at runtime - no need to configure or change it.
+
 
 /** Stream of customer updates from operational customer database */
 CREATE TABLE Customers_Cdcstream (
