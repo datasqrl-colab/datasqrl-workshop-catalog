@@ -5,7 +5,6 @@
 
 /** Stream of customer orders with nested line items referencing products and sellers.
   Order events are produced by the online ordering system. */
-/*+no_query */
 CREATE TABLE OrderEvents (
     order_id STRING NOT NULL,
     customer_id STRING NOT NULL, -- FK to masterdata Customers
@@ -30,7 +29,6 @@ CREATE TABLE OrderEvents (
 
 /** Stream of payment transactions.
     Payment transactions happen within 30 days of an order (i.e. transaction_approved_at < order_purchase_timestamp + INTERVAL 30 DAYS) since orders are closed for non-payment within that interval. */
-/*+no_query */
 CREATE TABLE PaymentEvents (
     order_id STRING NOT NULL,
     payment_sequential INT NOT NULL, -- when the payment is split this captures the sequence number
@@ -49,7 +47,6 @@ CREATE TABLE PaymentEvents (
 
 /** Stream of order fulfillment events (shipped, delivered).
   Fulfillment events happen within 60 days of the order being placed (i.e. timestamp < order_purchase_timestamp + INTERVAL 60 DAYS) since orders are closed or considered lost after that time. */
-/*+no_query */
 CREATE TABLE OrderFulfillmentEvents (
     order_id STRING NOT NULL,
     event_type STRING NOT NULL, -- one of: shipped, delivered
@@ -65,7 +62,6 @@ CREATE TABLE OrderFulfillmentEvents (
 
 /** Stream of customer reviews for their orders.
   Review events happen within 90 days of order placement (i.e. review_answer_timestamp < order_purchase_timestamp + INTERVAL 90 DAYS) since feedback surveys are only accessible within that interval. */
-/*+no_query */
 CREATE TABLE ReviewEvents (
     review_id STRING NOT NULL,
     order_id STRING NOT NULL,
