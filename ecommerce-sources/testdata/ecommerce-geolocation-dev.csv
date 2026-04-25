@@ -421,3 +421,4 @@ geolocation_zip_code_prefix,geolocation_lat,geolocation_lng,geolocation_city,geo
 79833,-22.263919999999928,-54.78347999999994,dourados,MS,2016-01-01 00:00:00
 86490,-23.460536999999945,-50.38060399999996,ribeirão do pinhal,PR,2016-01-01 00:00:00
 90560,-30.028527276288788,-51.21717597336376,porto alegre,RS,2016-01-01 00:00:00
+0, 0.0, 0.0, watermark advancement for testing, XX, 2030-01-01 00:00:00
