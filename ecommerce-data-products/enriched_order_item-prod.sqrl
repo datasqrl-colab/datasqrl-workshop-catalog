@@ -3,7 +3,7 @@
 -- Uses kafka connector to produce/consume from kafka topic.
 
 /**
-Flattened order items enriched with customer and product information;
+Flattened order items enriched with customer and product information
 invalid or partial records are removed.
 */
 /*+engine(kafka) */
@@ -26,4 +26,4 @@ CREATE TABLE EnrichedOrderItems (
     product_height_cm INT,
     product_width_cm INT,
     producer_timestamp TIMESTAMP(3) NOT NULL METADATA FROM 'timestamp'
-)
+);

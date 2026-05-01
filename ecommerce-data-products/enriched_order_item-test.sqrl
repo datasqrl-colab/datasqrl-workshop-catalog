@@ -3,7 +3,7 @@
 -- Uses file system connector with test data for sink and source
 
 /**
-  Flattened order items enriched with customer and product information;
+  Flattened order items enriched with customer and product information
   invalid or partial records are removed.
  */
 CREATE TABLE EnrichedOrderItems (
