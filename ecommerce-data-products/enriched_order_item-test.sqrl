@@ -1,0 +1,36 @@
+-- Enriched Order Items data product for Test Environment
+--
+-- Uses file system connector with test data for sink and source
+
+/**
+  Flattened order items enriched with customer and product information;
+  invalid or partial records are removed.
+ */
+CREATE TABLE EnrichedOrderItems (
+    order_id STRING NOT NULL,
+    customer_id STRING NOT NULL,
+    order_item_id INT NOT NULL,
+    product_id STRING NOT NULL,
+    seller_id STRING NOT NULL,
+    order_purchase_timestamp TIMESTAMP(3) NOT NULL,
+    shipping_limit_date TIMESTAMP(3),
+    price DOUBLE,
+    freight_value DOUBLE,
+    customer_zip STRING NOT NULL,
+    customer_city STRING,
+    customer_state STRING,
+    product_category_name STRING NOT NULL,
+    product_weight_g INT,
+    product_length_cm INT,
+    product_height_cm INT,
+    product_width_cm INT,
+    producer_timestamp TIMESTAMP(3) NOT NULL,
+    WATERMARK FOR producer_timestamp AS producer_timestamp - INTERVAL '0.001' SECOND
+) WITH (
+    'connector' = 'filesystem',
+    'path' = 'data/enriched-order-items',
+    'path' = '${DATA_PATH}/enriched-order-items-{{ecommerce-data-products-test-data}}.jsonl',
+    'source.monitor-interval' = '10 min',
+    'format' = 'json',
+    'json.timestamp-format.standard' = 'ISO-8601'
+);

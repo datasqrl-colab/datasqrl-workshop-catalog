@@ -16,7 +16,7 @@ This catalog contains the data source definitions for the core e-commerce data.
 
 ![Data Model](docs/olist_data_model.png)
 
-The `-schema-only.sqrl` files contain the base schema for all the table definitions. All other versions are for specific environments like `test` (for local development and testing) or `qa` (for QA and extended testing on larger datasets).
+Each filename ends with the version. Versions are for specific environments like `test` (for local development and testing against static files) or `prod` for (pre-)production environments using Kafka for data input and output.
 
 ## Changelog & History
 

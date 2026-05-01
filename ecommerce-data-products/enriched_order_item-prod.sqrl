@@ -1,0 +1,29 @@
+-- Enriched Order Items data product for Production Environment
+--
+-- Uses kafka connector to produce/consume from kafka topic.
+
+/**
+Flattened order items enriched with customer and product information;
+invalid or partial records are removed.
+*/
+/*+engine(kafka) */
+CREATE TABLE EnrichedOrderItems (
+    order_id STRING NOT NULL,
+    customer_id STRING NOT NULL,
+    order_item_id INT NOT NULL,
+    product_id STRING NOT NULL,
+    seller_id STRING NOT NULL,
+    order_purchase_timestamp TIMESTAMP(3) NOT NULL,
+    shipping_limit_date TIMESTAMP(3),
+    price DOUBLE,
+    freight_value DOUBLE,
+    customer_zip STRING NOT NULL,
+    customer_city STRING,
+    customer_state STRING,
+    product_category_name STRING NOT NULL,
+    product_weight_g INT,
+    product_length_cm INT,
+    product_height_cm INT,
+    product_width_cm INT,
+    producer_timestamp TIMESTAMP(3) NOT NULL METADATA FROM 'timestamp'
+)
